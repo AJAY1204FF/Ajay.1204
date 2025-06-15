@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Tic Tac Toe - Ultimate</title>
+    <style>
+        :root {
+            --primary-color: #0ff;
+            --secondary-color: #f0f;
+            --bg-color: #111;
+            --cell-color: #222;
+            --text-color: #fff;
+            --coin-color: #ffd700;
+            --premium-color: #42a5f5;
+        }
+
+        body {
+            font-family: 'arial', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            transition: all 0.5s ease-in-out;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px var(--primary-color), 0 0 20px var(--primary-color), 0 0 30px var(--primary-color);
+        }
+        
+        /* --- Always Visible UI --- */
+        #top-right-ui {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            z-index: 101;
+        }
+
+        .coin-display {
+            font-size: 1.5rem;
+            color: var(--coin-color);
+            background-color: rgba(0,0,0,0.7);
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid var(--coin-color);
+            text-shadow: 0 0 8px var(--coin-color);
+        }
+
+        #profile-icon-container {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        #profile-icon-container:hover {
+            transform: scale(1.1);
+        }
+        #profile-icon-container.hidden {
+            display: none;
+        }
+        
+        #profile-logo-display {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid var(--primary-color);
+            background-color: #333;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            overflow: hidden;
+        }
+
+        /* --- Screens & Panels --- */
+        .screen { display: none; flex-direction: column; align-items: center; width: 100%;}
+        .screen.active { display: flex; }
+        .panel { background-color: rgba(0, 0, 0, 0.8); padding: 25px; border-radius: 10px; border: 1px solid var(--primary-color); box-shadow: 0 0 20px var(--primary-color); width: 100%; max-width: 500px; text-align: center; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 5px; color: var(--primary-color); font-weight: bold; }
+        .input-group input, .input-group select { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid var(--primary-color); background-color: #333; color: white; box-sizing: border-box; font-size: 1rem; }
+
+        /* --- Buttons --- */
+        button { background-color: var(--primary-color); color: #000; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: all 0.3s; margin: 3px; text-transform: uppercase; }
+        button:hover { filter: brightness(1.2); transform: scale(1.05); box-shadow: 0 0 15px var(--primary-color); }
+        button.secondary-btn { background-color: #555; color: white; }
+        button.secondary-btn:hover { background-color: #777; }
+        button.premium-btn { background: linear-gradient(45deg, var(--premium-color), #8e24aa); color: white; }
+        button.premium-btn:hover { box-shadow: 0 0 15px var(--premium-color); }
+
+        /* --- Start Screen --- */
+        #start-screen .button-group { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+        #start-screen button { width: 250px; }
+
+        /* --- Game Board --- */
+        .board { display: grid; grid-template-columns: repeat(3, 100px); grid-template-rows: repeat(3, 100px); gap: 10px; margin: 20px 0; }
+        .cell { width: 100px; height: 100px; background-color: rgba(34,34,34,0.7); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 3rem; cursor: pointer; transition: all 0.3s; border: 2px solid transparent; }
+        .cell:hover { border-color: var(--primary-color); box-shadow: 0 0 15px var(--primary-color); }
+        .cell.x { color: var(--primary-color); text-shadow: 0 0 10px var(--primary-color); }
+        .cell.o { color: var(--secondary-color); text-shadow: 0 0 10px var(--secondary-color); }
+
+        /* --- Modals --- */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background-color: var(--bg-color); padding: 30px; border-radius: 10px; text-align: center; border: 2px solid var(--primary-color); box-shadow: 0 0 20px var(--primary-color); max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; }
+        .modal h2 { font-size: 2rem; margin-bottom: 20px; color: var(--primary-color); }
+
+        /* --- Store Modal --- */
+        #store-modal .store-section { margin-bottom: 30px; }
+        #store-modal h3 { color: var(--secondary-color); border-bottom: 1px solid var(--secondary-color); padding-bottom: 5px; margin-bottom: 15px; }
+        .store-item-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 15px; }
+        .store-item { background-color: #333; padding: 10px; border-radius: 8px; border: 1px solid #555; text-align: center; }
+        .store-item .item-preview { width: 60px; height: 40px; border-radius: 5px; margin: 0 auto 10px; border: 2px solid white; background-size: cover; background-position: center; }
+        .store-item .item-icon-preview { font-size: 2rem; }
+        .buy-button { background-color: var(--coin-color); color: black; font-size: 0.9rem; padding: 5px 10px; }
+        
+        /* --- Profile Modal --- */
+        #profile-logo-container { display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 20px;}
+        #profile-modal-logo { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--primary-color); cursor: pointer; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; font-size: 4rem; overflow: hidden;}
+        #upload-logo-btn { font-size: 0.9rem; padding: 8px 15px; }
+        #default-logos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 10px; margin-top: 15px;}
+        .default-logo-option { font-size: 2rem; cursor: pointer; padding: 5px; border-radius: 5px; transition: background-color 0.2s; }
+        .default-logo-option:hover, .default-logo-option.selected { background-color: var(--primary-color); color: #111; }
+    </style>
+</head>
+<body>
+
+    <div id="top-right-ui">
+        <div id="profile-icon-container" onclick="showProfile()">
+            <div id="profile-logo-display">👤</div>
+        </div>
+        <div class="coin-display" id="main-coin-display">💰 0</div>
+    </div>
+    
+    <input type="file" id="logo-uploader" accept="image/*" style="display: none;">
+
+    <!-- All screens go here -->
+    <div id="start-screen" class="screen active">
+        <h1>Neon Tic Tac Toe</h1>
+        <div class="button-group">
+            <button onclick="showScreen('mode-selection-screen')">Start Game</button>
+            <button class="secondary-btn" onclick="showStore()">Store</button>
+        </div>
+    </div>
+    
+    <!-- Other screens are the same as before -->
+    <div id="mode-selection-screen" class="screen">
+        <div class="panel">
+            <h2>Select Play Mode</h2>
+            <div class="input-group">
+                <label for="player1-name">Your Name</label>
+                <input type="text" id="player1-name" placeholder="Enter Your Name">
+            </div>
+            <div id="player2-name-group" class="input-group" style="display: none;">
+                <label for="player2-name">Friend's Name</label>
+                <input type="text" id="player2-name" placeholder="Enter Friend's Name">
+            </div>
+            <div id="difficulty-group" class="input-group">
+                <label for="difficulty">Bot Difficulty</label>
+                <select id="difficulty">
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Unbeatable (IQ 100+)</option>
+                </select>
+            </div>
+            <div class="mode-buttons">
+                <button onclick="setupGame('friend')">Play with Friend</button>
+                <button onclick="setupGame('computer')">Play with Bot</button>
+            </div>
+            <button onclick="handlePremiumPurchase('tournament', 0)" class="premium-btn">🏆 Tournament</button>
+            <button class="secondary-btn" onclick="showScreen('start-screen')">Back to Menu</button>
+        </div>
+    </div>
+
+    <div id="game-screen" class="screen game-container">
+        <div class="status" id="status"></div>
+        <div class="board" id="board"></div>
+        <div class="game-controls">
+            <button id="resetBtn" onclick="resetGame()">New Game</button>
+            <button class="secondary-btn" onclick="showScreen('mode-selection-screen')">Change Mode</button>
+        </div>
+    </div>
+    
+    <!-- Modals -->
+    <div class="modal" id="winModal"> <div class="modal-content"> <h2 id="winTitle"></h2> <p id="winMessage"></p> <p id="rewardMessage"></p> <button onclick="closeModal()">Play Again</button> </div> </div>
+    <div class="modal" id="store-modal"> <div class="modal-content"> <h2>Store</h2><div id="store-themes"></div><div id="store-icons"></div><button class="secondary-btn" onclick="closeStore()">Close</button> </div> </div>
+    
+    <div class="modal" id="profile-modal">
+        <div class="modal-content">
+            <h2>Player Profile</h2>
+            <div id="profile-logo-container">
+                <div id="profile-modal-logo" onclick="document.getElementById('logo-uploader').click()">👤</div>
+                <div>
+                    <button id="upload-logo-btn" onclick="document.getElementById('logo-uploader').click()">Upload Logo</button>
+                    <div id="default-logos-grid"></div>
+                </div>
+            </div>
+            <div class="input-group"><label for="profile-name">Player Name</label><input type="text" id="profile-name" onchange="updateProfileData()"></div>
+            <!-- Other profile stats... -->
+            <button class="secondary-btn" onclick="closeProfile()">Close</button>
+        </div>
+    </div>
+
+
+    <script>
+    // --- DOM Elements ---
+    const screens = document.querySelectorAll('.screen');
+    const boardElement = document.getElementById('board');
+    const statusDisplay = document.getElementById('status');
+    const winModal = document.getElementById('winModal');
+    const storeModal = document.getElementById('store-modal');
+    const profileModal = document.getElementById('profile-modal');
+    const profileIconContainer = document.getElementById('profile-icon-container');
+    const logoUploader = document.getElementById('logo-uploader');
+
+    // --- Game State & Player Data ---
+    let board, currentPlayer, gameActive, gameMode, difficulty, playerXName, playerOName;
+    let playerData = {};
+    const defaultPlayerData = {
+        coins: 100,
+        profileName: 'Player',
+        profileLogo: '👤', // Default emoji or Data URL for image
+        unlockedThemes: ['theme-classic'],
+        unlockedIcons: ['xo'],
+        premiumItems: [] // To store purchased premium items
+    };
+    
+    const defaultLogos = ['👤', '🤖', '👑', '🔥', '💎', '💀'];
+
+    const themeData = {
+        'theme-classic': { name: 'Classic Neon', imageUrl: "none", style: 'linear-gradient(45deg, #0ff, #f0f)', price: 0 },
+        // IMPORTANT: Replace these placeholder URLs with your actual image URLs
+        'theme-space': { name: 'Cosmic', imageUrl: "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2071&auto=format&fit=crop", price: 150 },
+        'theme-tech': { name: 'Circuit', imageUrl: "https://images.unsplash.com/photo-1519791843922-c65b6de3e666?q=80&w=2070&auto=format&fit=crop", price: 150 },
+        'theme-future': { name: 'Futuristic', imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070&auto=format&fit=crop", price: 200, premium: true }
+    };
+
+    const iconData = {
+        xo: { x: 'X', o: 'O', name: 'Classic X/O', price: 0 },
+        catdog: { x: '🐱', o: '🐶', name: 'Cat vs Dog', price: 50 },
+        swordshield: { x: '⚔️', o: '🛡️', name: 'Battle', price: 75 },
+        sunmoon: { x: '☀️', o: '🌙', name: 'Day & Night', price: 75 },
+        firewater: { x: '🔥', o: '💧', name: 'Elements', price: 100, premium: true }
+    };
+    
+    let xIcon, oIcon;
+
+    // --- Data Management ---
+    function saveData() { localStorage.setItem('ticTacToeUltimateData', JSON.stringify(playerData)); }
+    function loadData() {
+        const savedData = localStorage.getItem('ticTacToeUltimateData');
+        playerData = savedData ? JSON.parse(savedData) : { ...defaultPlayerData };
+        Object.keys(defaultPlayerData).forEach(key => {
+            if (playerData[key] === undefined) playerData[key] = defaultPlayerData[key];
+        });
+        applyTheme();
+        applyIcons();
+        updateAllDisplays();
+    }
+    
+    function updateAllDisplays() {
+        document.getElementById('main-coin-display').textContent = `💰 ${playerData.coins}`;
+        document.getElementById('player1-name').value = playerData.profileName;
+        updateProfileLogoDisplay();
+    }
+    
+    // --- Screen Management ---
+    function showScreen(screenId) {
+        screens.forEach(screen => screen.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+        
+        // Hide/Show profile icon based on screen
+        profileIconContainer.classList.toggle('hidden', screenId !== 'start-screen');
+
+        if(screenId === 'game-screen' && !gameActive) startGame();
+        
+        if (screenId === 'mode-selection-screen') {
+            document.getElementById('player2-name-group').style.display = 'none';
+            document.getElementById('difficulty-group').style.display = 'block';
+        }
+    }
+
+    // --- Profile Logic ---
+    function showProfile() {
+        document.getElementById('profile-name').value = playerData.profileName;
+        const defaultLogosGrid = document.getElementById('default-logos-grid');
+        defaultLogosGrid.innerHTML = '';
+        defaultLogos.forEach(logo => {
+            const span = document.createElement('span');
+            span.className = 'default-logo-option';
+            span.textContent = logo;
+            span.onclick = () => {
+                playerData.profileLogo = logo;
+                updateProfileLogoDisplay();
+                saveData();
+            };
+            defaultLogosGrid.appendChild(span);
+        });
+        profileModal.style.display = 'flex';
+    }
+    
+    function closeProfile() { profileModal.style.display = 'none'; }
+    
+    function updateProfileData() {
+        playerData.profileName = document.getElementById('profile-name').value;
+        document.getElementById('player1-name').value = playerData.profileName;
+        saveData();
+    }
+
+    function updateProfileLogoDisplay() {
+        const logoDisplays = [document.getElementById('profile-logo-display'), document.getElementById('profile-modal-logo')];
+        logoDisplays.forEach(display => {
+            if (playerData.profileLogo.startsWith('data:image')) {
+                display.textContent = '';
+                display.style.backgroundImage = `url(${playerData.profileLogo})`;
+            } else {
+                display.style.backgroundImage = 'none';
+                display.textContent = playerData.profileLogo;
+            }
+        });
+    }
+    
+    logoUploader.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                playerData.profileLogo = e.target.result;
+                updateProfileLogoDisplay();
+                saveData();
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // --- Store & Item Logic ---
+    function showStore() { populateStore(); storeModal.style.display = 'flex'; }
+    function closeStore() { storeModal.style.display = 'none'; }
+    
+    function populateStore() {
+        const storeThemes = document.getElementById('store-themes');
+        const storeIcons = document.getElementById('store-icons');
+        storeThemes.innerHTML = '<h3>Themes</h3><div class="store-item-grid"></div>';
+        storeIcons.innerHTML = '<h3>Icons</h3><div class="store-item-grid"></div>';
+        const themesGrid = storeThemes.querySelector('.store-item-grid');
+        const iconsGrid = storeIcons.querySelector('.store-item-grid');
+
+        const createItemHTML = (type, key, item) => {
+            const isOwned = type === 'theme' ? playerData.unlockedThemes.includes(key) : playerData.unlockedIcons.includes(key);
+            const isPremiumOwned = playerData.premiumItems.includes(key);
+            
+            let buttonHTML = '';
+            if (item.premium) {
+                if (isPremiumOwned) buttonHTML = `<span class="owned-tag">Premium Owned</span>`;
+                else buttonHTML = `<button class="premium-btn" onclick="handlePremiumPurchase('${key}', ${item.price})">💎 Premium</button>`;
+            } else {
+                if (isOwned) buttonHTML = `<span class="owned-tag">Owned</span>`;
+                else buttonHTML = `<button class="buy-button" onclick="buyItem('${type}', '${key}', ${item.price})">💰 ${item.price}</button>`;
+            }
+
+            const previewHTML = type === 'theme' ? `<div class="item-preview" style="background-image: url(${item.imageUrl}); background-color: var(--bg-color);"></div>` : `<div class="item-icon-preview">${item.x} / ${item.o}</div>`;
+
+            return `<div class="store-item">${previewHTML}<div class="item-name">${item.name}</div>${buttonHTML}</div>`;
+        };
+        
+        Object.keys(themeData).forEach(key => themesGrid.innerHTML += createItemHTML('theme', key, themeData[key]));
+        Object.keys(iconData).forEach(key => iconsGrid.innerHTML += createItemHTML('icon', key, iconData[key]));
+    }
+    
+    function buyItem(type, key, price) {
+        if (playerData.coins >= price) {
+            playerData.coins -= price;
+            (type === 'theme' ? playerData.unlockedThemes : playerData.unlockedIcons).push(key);
+            saveData();
+            updateAllDisplays();
+            populateStore();
+        } else { alert("Not enough coins!"); }
+    }
+    
+    function handlePremiumPurchase(itemKey, price) {
+        alert(`This is a premium feature (${itemKey}).\nIn a real game, this would open a payment screen to complete the purchase.`);
+        // To simulate a purchase for testing, you could uncomment the following lines:
+        // if (!playerData.premiumItems.includes(itemKey)) {
+        //     playerData.premiumItems.push(itemKey);
+        //     if (themeData[itemKey]) playerData.unlockedThemes.push(itemKey);
+        //     if (iconData[itemKey]) playerData.unlockedIcons.push(itemKey);
+        //     saveData();
+        //     populateStore();
+        //     alert('Purchase successful (simulated)!');
+        // }
+    }
+
+    function applyTheme() {
+        const theme = themeData[playerData.selectedTheme] || themeData['theme-classic'];
+        if (theme.imageUrl !== "none") {
+            document.body.style.backgroundImage = `url(${theme.imageUrl})`;
+        } else {
+            document.body.style.backgroundImage = 'none';
+        }
+    }
+    function applyIcons() {
+        const icons = iconData[playerData.selectedIcon] || iconData['xo'];
+        xIcon = icons.x; oIcon = icons.o;
+    }
+    
+    // --- Core Game Logic (mostly unchanged) ---
+    function setupGame(mode) {
+        gameMode = mode;
+        difficulty = document.getElementById('difficulty').value;
+        playerXName = document.getElementById('player1-name').value || 'Player 1';
+        playerOName = (mode === 'friend') ? (document.getElementById('player2-name').value || 'Player 2') : `${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} Bot`;
+        showScreen('game-screen');
+    }
+    
+    document.getElementById('mode-selection-screen').addEventListener('click', e => {
+        if(e.target.textContent.includes('Friend')) {
+            document.getElementById('player2-name-group').style.display = 'block';
+            document.getElementById('difficulty-group').style.display = 'none';
+        } else if (e.target.textContent.includes('Bot')) {
+            document.getElementById('player2-name-group').style.display = 'none';
+            document.getElementById('difficulty-group').style.display = 'block';
+        }
+    });
+
+    function startGame() {
+        gameActive = true; currentPlayer = 'X'; board = Array(9).fill('');
+        boardElement.innerHTML = '';
+        for (let i = 0; i < 9; i++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell'); cell.dataset.index = i;
+            cell.addEventListener('click', handleCellClick);
+            boardElement.appendChild(cell);
+        }
+        updateStatus();
+    }
+    function resetGame() { startGame(); }
+    
+    function handleCellClick(e) { /* ... same as before ... */ }
+    function makeMove(index, player) { /* ... same as before ... */ }
+    function updateStatus() {
+        if (!gameActive) return;
+        const playerName = currentPlayer === 'X' ? `<span class="player-x">${playerXName}</span>` : `<span class="player-o">${playerOName}</span>`;
+        statusDisplay.innerHTML = `Turn: <span class="player-turn">${playerName}</span>`;
+    }
+    function checkWin() { /* ... same as before ... */ }
+    function checkDraw() { /* ... same as before ... */ }
+    function endGame(winInfo) { /* ... same as before, handles rewards ... */ }
+    function closeModal() { winModal.style.display = 'none'; resetGame(); }
+    function makeComputerMove() { /* ... same as before with minimax ... */ }
+
+    // Placeholder for unchanged functions from previous version
+    const winPatterns = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
+    handleCellClick = function(e) { if (!gameActive) return; const index = parseInt(e.target.dataset.index); if (board[index] !== '') return; makeMove(index, currentPlayer); if (gameActive) { currentPlayer = (currentPlayer === 'X') ? 'O' : 'X'; updateStatus(); if (gameMode === 'computer' && currentPlayer === 'O' && gameActive) setTimeout(makeComputerMove, 500); } };
+    makeMove = function(index, player) { board[index] = player; const cell = boardElement.querySelector(`[data-index='${index}']`); cell.textContent = (player === 'X') ? xIcon : oIcon; cell.classList.add(player.toLowerCase()); const winInfo = checkWin(); if (winInfo) { endGame(winInfo); } else if (checkDraw()) { endGame(null); } };
+    checkWin = function() { for (const p of winPatterns) { const [a, b, c] = p; if (board[a] && board[a] === board[b] && board[a] === board[c]) return { winner: board[a], pattern: p }; } return null; };
+    checkDraw = function() { return board.every(cell => cell !== ''); };
+    endGame = function(winInfo) { gameActive = false; let title, message, rewardMsg = ''; if (winInfo) { title = 'Winner!'; const winnerName = winInfo.winner === 'X' ? playerXName : playerOName; message = `<span class="${winInfo.winner === 'X' ? 'player-x' : 'player-o'}">${winnerName}</span> wins!`; if(gameMode === 'computer') { if(winInfo.winner === 'X'){ playerData.coins+=10; rewardMsg = 'You earned 10 Coins! 💰'; } } } else { title = 'Draw!'; message = 'The game is a tie.'; if(gameMode==='computer'){ playerData.coins+=2; rewardMsg='You earned 2 coins.'; } } saveData(); setTimeout(() => { winModal.querySelector('#winTitle').textContent = title; winModal.querySelector('#winMessage').innerHTML = message; winModal.querySelector('#rewardMessage').textContent = rewardMsg; winModal.style.display = 'flex'; updateAllDisplays(); }, 500); };
+    makeComputerMove = function() { if (!gameActive) return; let move; if(difficulty === 'easy') move = getRandomMove(); else if(difficulty === 'medium') move = Math.random() < 0.7 ? findBestMove() : getRandomMove(); else move = findBestMove(); makeMove(move, 'O'); if(gameActive) { currentPlayer = 'X'; updateStatus(); } };
+    function getRandomMove() { const empty = board.map((v, i) => (v === '') ? i : null).filter(v => v !== null); return empty[Math.floor(Math.random() * empty.length)]; }
+    function findBestMove() { let best = -Infinity, move; for (let i = 0; i < 9; i++) { if (board[i] === '') { board[i] = 'O'; let score = minimax(board, 0, false); board[i] = ''; if (score > best) { best = score; move = i; } } } return move; }
+    function minimax(b, d, isMax) { let win = checkWin(); if(win) return win.winner === 'O' ? 10 : -10; if(checkDraw()) return 0; if(isMax) { let best=-Infinity; for(let i=0;i<9;i++){if(b[i]===''){b[i]='O';best=Math.max(best,minimax(b,d+1,!isMax));b[i]='';}} return best;} else { let best=Infinity; for(let i=0;i<9;i++){if(b[i]===''){b[i]='X';best=Math.min(best,minimax(b,d+1,!isMax));b[i]='';}} return best;} }
+
+    // --- Initial Load ---
+    document.addEventListener('DOMContentLoaded', () => {
+        loadData();
+        showScreen('start-screen');
+    });
+    </script>
+</body>
+</html>

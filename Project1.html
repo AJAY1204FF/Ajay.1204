@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dholka College 📚</title>
+    <style>
+        /* Internal CSS */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 1em;
+        }
+        }
+
+        h2{
+            font-size: 17px;
+            color: orange;
+            font-weight: 500px;
+            font-decoratin: bold;
+        }
+        nav {
+            background-color: #34495e;
+            padding: 1em;
+            position: sticky;
+            top: 0;
+        }
+
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        nav ul li {
+            margin: 0 5px;
+            font-size: 15px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        footer {
+            background-color: #2c3e50;
+            font-size: 5px;
+            color: white;
+            text-align: center;
+            padding: 1em;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Dholka College Study Portal</h1>
+        <p>Your Gateway to Learning Resources</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="home.html">Home</a></li>
+            <li><a href="books.html">Books</a></li>
+            <li><a href="mcqs.html">Mcqs</a></li>
+            <li><a href="assignments.html">Assignments</a></li>
+            <li><a href="login.html">Login</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <section id="home" class="card">
+            <h2>Welcome to Dholka College</h2>
+        </section>
+
+        <div class="resources-grid">
+            <div class="card">
+                <h3>PDF Books</h3>
+                <p>Access textbook PDFs and reference materials</p>
+                <button onclick="showBooks()">View Books</button>
+            </div>
+
+            <div class="card">
+                <h3>MCQs</h3>
+                <p>Practice Multiple Choice Questions</p>
+                <button onclick="showMCQs()">View MCQs</button>
+            </div>
+
+            <div class="card">
+                <h3>Assignments</h3>
+                <p>Download  assignments</p>
+                <button onclick="showAssignments()">View Assignments</button>
+            </div>
+        </div>
+
+        <!-- File Upload Form -->
+        <div class="card">
+            <h3>Upload Material (Teachers Only)</h3>
+            <form action="upload.php" method="post" enctype="multipart/form-data">
+                <input type="file" name="fileToUpload" id="fileToUpload">
+                <select name="materialType">
+                    <option value="book">Book</option>
+                    <option value="mcq">MCQ</option>
+                    <option value="assignment">Assignment</option>
+                </select>
+                <input type="submit" value="Upload File">
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2023 Dholka College. All rights reserved by Ajay Vaghela.</p>
+    </footer>
+
+    <script>
+        // JavaScript for basic interactivity
+        function showBooks() {
+            alert("Loading books...");
+            // Add AJAY call to load books dynamically
+        }
+
+        function showMCQs() {
+            alert("Loading MCQs...");
+            // Add AJAY call to load MCQs
+        }
+
+        function showAssignments() {
+            alert("Loading Assignments...");
+            // Add AJAY call to load assignments
+        }
+
+        // Form validation example
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const fileInput = document.getElementById('fileToUpload');
+            if (fileInput.files.length === 0) {
+                alert('Please select a file to upload');
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>
